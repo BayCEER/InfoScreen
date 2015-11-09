@@ -6,6 +6,10 @@ import time
 import os
 import platform
 import datetime
+import logging
+
+
+from logging.handlers import RotatingFileHandler
 
 from string import Template
 
@@ -24,8 +28,12 @@ test = False
 
 if platform.system() == "Linux":    
     CONFIG  = "/etc/infoscreen"
+    LOGPATH = "/var/log/infoscreen.log"
 else:
-    CONFIG  = "../win"     
+    CONFIG  = "../win"
+    LOGPATH = "./infoscreen.log"
+    
+logger = logging.getLogger("Infocscreen")
 
 class WebView(QWebView):    
     
@@ -50,50 +58,59 @@ class WebView(QWebView):
         self.connect(self.worker, SIGNAL("loadScreen"), self.loadScreen)
         self.worker.start()
         
-        self.screenSaver = ScreenSaver()
-        self.screenSaver.start()
+        if platform.system() == "Linux":  
+            self.screenSaver = ScreenSaver()
+            self.screenSaver.start()        
+        
         
     def _loadProgress(self, progress):
-        # print("Loaded {}%".format(progress))
+        # logger.info("Loaded {}%".format(progress))
         pass
                     
     def loadScreen(self,item):        
-        if self.loading:
-            print("Stop loading")
-            self.stop()             
-        
+#         if self.loading:
+#             logger.info("Stop loading")
+#             self.stop()             
+#         
         if 'template' in item: 
-            print("Load template:{0}".format(item["template"]))
+            logger.info("Load template:{0}".format(item["template"]))
             ftemp = open( os.path.join(CONFIG,"{}Template.html".format(item['template'])))
             src = Template(ftemp.read())
             html = src.substitute(item)                       
             baseUrl = QUrl.fromLocalFile(item["basePath"] + "/");
             self.setHtml(html,baseUrl)                                    
         else:
-            print("Load url:{0}".format(item["url"]))        
+            logger.info("Load url:{0}".format(item["url"]))        
             self.load(QUrl(item["url"]))             
                     
     def _loadStarted(self):
-        # print("Load started.")
+        # logger.info("Load started.")
         self.loading = True
     
     def _loadFinished(self, ok):
-        print("Load finished.")
+        logger.info("Load finished.")
         self.loaded = ok
         self.loading = False
 
 class ScreenSaver(QThread):
     def __init__(self):
         QThread.__init__(self)
+        os.system("xset s off")
+        self._stopped = False 
+        
+    def __del__(self):
+        self._stopped = True   
+    
     def run(self):
-        h = datetime.datetime.now().hour
-        if h > 22 or h < 6:
-            print("Turn display off")
-            os.system("xset dpms force standby")
-        else:
-            print("Turn display on")
-            os.system("xset dpms force on")
-        time.sleep(600)
+        while not self._stopped:
+            h = datetime.datetime.now().hour
+            if h > 22 or h < 6:
+                logger.info("Turn display off")
+                os.system("xset dpms force standby")
+            else:
+                logger.info("Turn display on")
+                os.system("xset dpms force on")
+            time.sleep(60)
         
         
 class ScreenThread(QThread): 
@@ -124,20 +141,41 @@ def getConfig(url):
     return json.loads(data)
 
 def readConfig(path):
-    print("readConfig")             
+    logger.info("readConfig")             
     f = open(os.path.join(CONFIG,path),'r')    
     data = f.read()
     f.close()
-    return json.loads(data)                    
+    return json.loads(data)          
+
+def initLog(path):
+    
+    logger.setLevel(logging.INFO)
+    
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    ch.setFormatter(formatter)
+ 
+    fh = RotatingFileHandler(LOGPATH, maxBytes=2048, backupCount=10)
+    fh.setFormatter(formatter)
+    
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
         
 def main(): 
+       
+    initLog(LOGPATH)
+            
     app = QApplication(sys.argv)
     app.setOverrideCursor(QCursor(Qt.BlankCursor))                 
     
     web = WebView(startPage="startPage.html", config=readConfig("infoscreen.json"))
-    web.showFullScreen()        
+    web.showFullScreen()
+    logger.info("Infoscreen started.")        
     sys.exit(app.exec_())
-    
+    logger.info("Infoscreen stopped.")
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,4 @@
 [
-{"url": "http://www.bayceer.uni-bayreuth.de", "duration": 5},
 {"url": "http://www.bayceer.uni-bayreuth.de/meteo", "duration": 5},
-{"template":"image", "basePath": "p:\\EclipseProjects\\InfoScreen\\deb\\usr\\share\\infoscreen\\content", "image": "image.jpg", "duration": 5}
+{"template":"image", "basePath": "C:\\Users\\oliver\\Documents\\GitHub\\InfoScreen\\deb\\usr\\share\\infoscreen\\content", "image": "image.jpg", "duration": 5},
 ]
