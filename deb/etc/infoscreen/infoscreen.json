@@ -1,5 +1,3 @@
 [
-{"url": "http://www.bayceer.uni-bayreuth.de", "duration": 5},
-{"url": "http://www.bayceer.uni-bayreuth.de/meteo", "duration": 5},
-{"template":"image", "basePath": "/usr/share/infoscreen/content", "image": "image.jpg", "duration": 5}
-]
+	{"startPage": "http://www.bayceer.uni-bayreuth.de/meteo/infoscreen.html"}
+] 
