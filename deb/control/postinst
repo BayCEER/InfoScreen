@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+# Hide boot messages 
+cp /usr/share/infoscreen/cmdline.txt /boot/cmdline.txt
+

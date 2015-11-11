@@ -1,0 +1,8 @@
+Package: [[name]]
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Depends: python, python-qt4, x11-xserver-utils, xterm 
+Description: InfoScreen for Raspberry Pi
+Maintainer: oliver.archner@uni-bayreuth.de

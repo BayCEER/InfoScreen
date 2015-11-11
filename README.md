@@ -1,2 +1,2 @@
 # InfoScreen
-InfoScreen Display 
+InfoScreen display for Raspberry PI based on QWebView web engine
